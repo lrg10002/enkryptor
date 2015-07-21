@@ -1,2 +1,4 @@
 # enkryptor
-an encryption system
+
+## Dependencies:
+- Jasypt
