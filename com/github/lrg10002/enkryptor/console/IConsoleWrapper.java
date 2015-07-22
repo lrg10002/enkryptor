@@ -6,6 +6,8 @@ public interface IConsoleWrapper {
 
     void println(Object o);
 
+    void printStackTrace(Throwable t);
+
     String readPassword();
 
     String readPassword(String prompt);

@@ -20,6 +20,11 @@ public class SystemWrapperImpl implements IConsoleWrapper {
     }
 
     @Override
+    public void printStackTrace(Throwable t) {
+        t.printStackTrace(console.writer());
+    }
+
+    @Override
     public String readPassword() {
         return new String(console.readPassword());
     }

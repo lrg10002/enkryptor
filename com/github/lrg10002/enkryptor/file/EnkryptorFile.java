@@ -1,12 +1,13 @@
 package com.github.lrg10002.enkryptor.file;
 
+import static com.github.lrg10002.enkryptor.core.Enkryptor.CHARSET;
+
 import com.github.lrg10002.enkryptor.encryption.Encryption;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Map;
@@ -121,7 +122,7 @@ public class EnkryptorFile {
             channel.read(namebuff);
             namebuff.flip();
 
-            cachedFileMappings.put(Encryption.decryptWithKey(new String(namebuff.array(), "UTF-8")), startingpos);
+            cachedFileMappings.put(Encryption.decryptWithKey(new String(namebuff.array(), CHARSET)), startingpos);
 
             channel.position(startingpos + sectionlen); //skip to next file section
         }
@@ -147,20 +148,20 @@ public class EnkryptorFile {
         long fileSectionLength;
 
         //HEADER
-        ByteBuffer namebuff = ByteBuffer.wrap(Encryption.encryptWithKey(name).getBytes(Charset.forName("UTF-8")));
+        ByteBuffer namebuff = ByteBuffer.wrap(Encryption.encryptWithKey(name).getBytes(CHARSET));
         ByteBuffer namelen = ByteBuffer.allocate(Integer.BYTES);
         namelen.putInt(namebuff.capacity());
         namelen.flip();
 
         String joinedTags = String.join(",", tags);
-        ByteBuffer tagsbuff = ByteBuffer.wrap(Encryption.encryptWithKey(joinedTags).getBytes(Charset.forName("UTF-8")));
+        ByteBuffer tagsbuff = ByteBuffer.wrap(Encryption.encryptWithKey(joinedTags).getBytes(CHARSET));
         ByteBuffer tagslen = ByteBuffer.allocate(Integer.BYTES);
         tagslen.putInt(tagsbuff.capacity());
         tagslen.flip();
 
         //FILE
         ByteBuffer filelen = ByteBuffer.allocate(Long.BYTES);
-        filelen.putLong(in.size() + (long) (Math.ceil((double) in.size()/(double) ENCRYPTION_BLOCK_SIZE)*Integer.BYTES));
+        filelen.putLong(in.size() + (long) (Math.ceil((double) in.size() / (double) ENCRYPTION_BLOCK_SIZE) * Integer.BYTES));
         filelen.flip();
 
         fileSectionLength = namebuff.capacity() + namelen.capacity()
@@ -215,7 +216,7 @@ public class EnkryptorFile {
         long start = channel.position();
         ByteBuffer len = ByteBuffer.allocate(Integer.BYTES);
         while (channel.position() < start + bytes) {
-            int bread = channel.read(len);
+            channel.read(len);
             len.flip();
             int blocklen = len.getInt();
             len.clear();
@@ -237,6 +238,10 @@ public class EnkryptorFile {
     private String readStringWithLength(ByteBuffer bb) throws IOException {
         byte[] bytes = new byte[bb.getInt()];
         bb.get(bytes);
-        return new String(bytes, "UTF-8");
+        return new String(bytes, CHARSET);
+    }
+
+    public void close() throws IOException {
+        channel.close();
     }
 }

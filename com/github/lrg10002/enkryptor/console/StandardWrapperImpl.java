@@ -18,6 +18,11 @@ public class StandardWrapperImpl implements IConsoleWrapper {
     }
 
     @Override
+    public void printStackTrace(Throwable t) {
+        t.printStackTrace(System.err);
+    }
+
+    @Override
     public String readPassword() {
         return readInput();
     }

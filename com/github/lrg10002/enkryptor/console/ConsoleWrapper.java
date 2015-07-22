@@ -77,8 +77,28 @@ public class ConsoleWrapper {
     }
 
     public void println(Object o) {
-        console.print(levelString);
+        console.print(levelString + ">");
         console.println(o);
+    }
+
+    public void println() {
+        console.println("");
+    }
+
+    public void errln(Object o) {
+        console.println("[ERROR]: " + o);
+    }
+
+    public String prompt(Object o) {
+        return console.readInput(o.toString());
+    }
+
+    public String promptPass(Object o) {
+        return console.readPassword(o.toString());
+    }
+
+    public void printStackTrace(Throwable t) {
+        console.printStackTrace(t);
     }
 
 

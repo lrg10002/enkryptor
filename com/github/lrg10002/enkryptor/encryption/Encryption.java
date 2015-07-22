@@ -18,18 +18,35 @@ public class Encryption {
     private static StandardStringDigester digester = new StandardStringDigester();
     private static SecureRandom random = new SecureRandom();
     private static StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+    private static String encryptorPass = "";
     private static StandardPBEByteEncryptor bencryptor = new StandardPBEByteEncryptor();
+    private static String bencryptorPass = "";
 
     static {
+        initDigester();
+        initEncryptor();
+        initBencryptor();
+    }
+
+    private static void initDigester() {
+        digester = new StandardStringDigester();
         digester.initialize();
         digester.setIterations(1000);
         digester.setSaltGenerator(new RandomSaltGenerator());
         digester.setStringOutputType("hexadecimal");
+    }
 
+    private static void initEncryptor() {
+        encryptor = new StandardPBEStringEncryptor();
         encryptor.initialize();
         encryptor.setStringOutputType("hexadecimal");
+        encryptor.setPassword(encryptorPass);
+    }
 
+    private static void initBencryptor() {
+        bencryptor = new StandardPBEByteEncryptor();
         bencryptor.initialize();
+        bencryptor.setPassword(bencryptorPass);
     }
 
     public static void setPrimaryPass(String p) {
@@ -57,14 +74,17 @@ public class Encryption {
 
     public static void setKey(char[] k) {
         key = k;
-        bencryptor.setPasswordCharArray(key);
+        bencryptorPass = new String(k);
+        initBencryptor();
     }
 
     public static boolean checkPassword(String pass, String hash) {
+        initDigester();
         return digester.matches(pass, hash);
     }
 
     public static String generateHash(String pass) {
+        initDigester();
         return digester.digest(pass);
     }
 
@@ -84,48 +104,56 @@ public class Encryption {
     }
 
     public static String encryptWithPrimary(String p) {
-        encryptor.setPasswordCharArray(primaryPass);
+        encryptorPass = new String(primaryPass);
+        initEncryptor();
         return encryptor.encrypt(p);
     }
 
     public static String encryptWithAnswers(String p) {
         String encr = p;
         for (int i = answers.size()-1; i <= 0; i--) {
-            encryptor.setPasswordCharArray(answers.get(i));
+            encryptorPass = new String(answers.get(i));
+            initEncryptor();
             encr = encryptor.encrypt(encr);
         }
         return encr;
     }
 
     public static String decryptWithPrimary(String p) {
-        encryptor.setPasswordCharArray(primaryPass);
+        encryptorPass = new String(primaryPass);
+        initEncryptor();
         return encryptor.decrypt(p);
     }
 
     public static String decryptWithAnswers(String p) {
         String decr = p;
         for (int i = 0; i < answers.size(); i++) {
-            encryptor.setPasswordCharArray(answers.get(i));
+            encryptorPass = new String(answers.get(i));
+            initEncryptor();
             decr = encryptor.decrypt(decr);
         }
         return decr;
     }
 
     public static String decryptWithKey(String s) {
-        encryptor.setPasswordCharArray(key);
+        encryptorPass = new String(key);
+        initEncryptor();
         return encryptor.decrypt(s);
     }
 
     public static String encryptWithKey(String s) {
-        encryptor.setPasswordCharArray(key);
+        encryptorPass = new String(key);
+        initEncryptor();
         return encryptor.encrypt(s);
     }
 
     public static byte[] encryptWithKey(byte[] bytes) {
+        initBencryptor();
         return bencryptor.encrypt(bytes);
     }
 
     public static byte[] decryptWithKey(byte[] bytes) {
+        initBencryptor();
         return bencryptor.decrypt(bytes);
     }
 
